@@ -27,7 +27,7 @@ public class AuthController {
     }
 
     @GetMapping(path = "/verifyAccount/{token}")
-    public ResponseEntity<Object> verifyAccount(@PathVariable String token) throws InvalidTokenException, UserNotFoundException {
+    public ResponseEntity<Object> verifyAccount(@PathVariable String token) throws InvalidTokenException, UserNotFoundException, EmailAlreadyVerifiedException {
         authService.verifyAccount(token);
         return responseHandler.responseBuilder(true, "Account activated successfully", HttpStatus.OK);
     }

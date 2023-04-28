@@ -21,6 +21,15 @@ public class ApplicationExceptionHandler {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(EmailAlreadyVerifiedException.class)
+    public Map<String, String> handleEmailAlreadyVerifiedException(EmailAlreadyVerifiedException exp) {
+        Map<String, String> errorMap = new HashMap<>();
+        errorMap.put("success", "false");
+        errorMap.put("message", exp.getMessage());
+        return errorMap;
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(SubredditNotFoundException.class)
     public Map<String, String> handleSubredditNotFoundException(SubredditNotFoundException exp) {
         Map<String, String> errorMap = new HashMap<>();

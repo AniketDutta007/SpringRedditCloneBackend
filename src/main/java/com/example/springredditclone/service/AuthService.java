@@ -55,7 +55,7 @@ public class AuthService {
     }
 
     @Transactional
-    public void signup (RegisterRequest registerRequest) throws UsernameAlreadyExistException, EmailAlreadyExistException {
+    public void signup(RegisterRequest registerRequest) throws UsernameAlreadyExistException, EmailAlreadyExistException {
 
         Optional<User> tuser = userRepository.findByUsername(registerRequest.getUsername());
         if (tuser.isPresent()) {
@@ -108,15 +108,18 @@ public class AuthService {
         return token;
     }
 
-    public void verifyAccount(String token) throws InvalidTokenException, UserNotFoundException {
+    public void verifyAccount(String token) throws InvalidTokenException, UserNotFoundException, EmailAlreadyVerifiedException {
         VerificationToken verficationToken = verificationTokenRepository.findByToken(token).orElseThrow(InvalidTokenException::new);
         fetchUserAndEnable(verficationToken);
     }
 
     @Transactional
-    public void fetchUserAndEnable (VerificationToken verificationToken) throws UserNotFoundException {
+    public void fetchUserAndEnable (VerificationToken verificationToken) throws UserNotFoundException, EmailAlreadyVerifiedException {
         Long userId = verificationToken.getUser().getId();
         User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+        if (user.isEnabled()) {
+            throw new EmailAlreadyVerifiedException();
+        }
         user.setEnabled(true);
         userRepository.save(user);
     }
