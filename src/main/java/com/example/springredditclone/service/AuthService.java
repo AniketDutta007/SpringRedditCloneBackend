@@ -4,9 +4,7 @@ import com.example.springredditclone.config.ApplicationConfig;
 import com.example.springredditclone.dto.AuthenticationResponse;
 import com.example.springredditclone.dto.LoginRequest;
 import com.example.springredditclone.dto.RegisterRequest;
-import com.example.springredditclone.exception.InvalidRefreshTokenException;
-import com.example.springredditclone.exception.InvalidTokenException;
-import com.example.springredditclone.exception.UserNotFoundException;
+import com.example.springredditclone.exception.*;
 import com.example.springredditclone.model.Name;
 import com.example.springredditclone.model.RefreshToken;
 import com.example.springredditclone.model.User;
@@ -32,6 +30,7 @@ import sendinblue.ApiException;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -56,7 +55,17 @@ public class AuthService {
     }
 
     @Transactional
-    public void signup (RegisterRequest registerRequest) {
+    public void signup (RegisterRequest registerRequest) throws UsernameAlreadyExistException, EmailAlreadyExistException {
+
+        Optional<User> tuser = userRepository.findByUsername(registerRequest.getUsername());
+        if (tuser.isPresent()) {
+            throw new UsernameAlreadyExistException();
+        }
+        tuser = userRepository.findByEmail(registerRequest.getEmail());
+        if (tuser.isPresent()) {
+            throw new EmailAlreadyExistException();
+        }
+
         Name name = new Name();
         name.setFirstname(registerRequest.getName().getFirstname());
         name.setMiddlename(registerRequest.getName().getMiddlename());
@@ -77,7 +86,6 @@ public class AuthService {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("FIRSTNAME", user.getName().getFirstname());
         parameters.put("VERIFICATION_LINK", appConfig.getUrl()+"/api/auth/verifyAccount/"+token);
-
 
         asyncTaskExecutor.execute(() -> {
             try {
@@ -114,10 +122,11 @@ public class AuthService {
     }
 
     public AuthenticationResponse login(LoginRequest loginRequest) throws UserNotFoundException {
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                 loginRequest.getUsername(),
                 loginRequest.getPassword()
-        ));
+        );
+        Authentication authentication = authenticationManager.authenticate(authenticationToken);
         SecurityContextHolder.getContext().setAuthentication(authentication);
         User user = userRepository.findByUsername(loginRequest.getUsername()).orElseThrow(UserNotFoundException::new);
         String token = jwtProvider.generateToken(authentication);

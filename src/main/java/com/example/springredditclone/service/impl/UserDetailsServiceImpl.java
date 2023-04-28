@@ -25,10 +25,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         User user = userRepository.findByUsername(username).orElseThrow(InvalidCredentialsException::new);
         return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(),
                 user.isEnabled(), true, true,
-                true, getAuthorities("USER"));
+                true, getAuthorities());
     }
 
-    private Collection<? extends GrantedAuthority> getAuthorities(String role) {
-        return Collections.singletonList(new SimpleGrantedAuthority(role));
+    private Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singletonList(new SimpleGrantedAuthority("USER"));
     }
 }

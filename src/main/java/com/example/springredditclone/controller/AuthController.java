@@ -3,13 +3,9 @@ package com.example.springredditclone.controller;
 import com.example.springredditclone.dto.AuthenticationResponse;
 import com.example.springredditclone.dto.LoginRequest;
 import com.example.springredditclone.dto.RegisterRequest;
-import com.example.springredditclone.exception.InvalidRefreshTokenException;
-import com.example.springredditclone.exception.InvalidTokenException;
-import com.example.springredditclone.exception.UserNotFoundException;
+import com.example.springredditclone.exception.*;
 import com.example.springredditclone.handler.ResponseHandler;
-import com.example.springredditclone.security.JWTProvider;
 import com.example.springredditclone.service.AuthService;
-import com.example.springredditclone.service.RefreshTokenService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,12 +18,10 @@ import org.springframework.web.bind.annotation.*;
 @AllArgsConstructor
 public class AuthController {
     private final AuthService authService;
-    private final RefreshTokenService refreshTokenService;
     private final ResponseHandler responseHandler;
-    private final JWTProvider jwtProvider;
 
     @PostMapping(path = "/signup")
-    public ResponseEntity<Object> signup(@Valid @RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<Object> signup(@Valid @RequestBody RegisterRequest registerRequest) throws EmailAlreadyExistException, UsernameAlreadyExistException {
         authService.signup(registerRequest);
         return responseHandler.responseBuilder(true, "Account created successfully", HttpStatus.CREATED);
     }

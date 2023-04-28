@@ -29,6 +29,24 @@ public class ApplicationExceptionHandler {
         return errorMap;
     }
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(UsernameAlreadyExistException.class)
+    public Map<String, String> handleUsernameAlreadyExistException(UsernameAlreadyExistException exp) {
+        Map<String, String> errorMap = new HashMap<>();
+        errorMap.put("success", "false");
+        errorMap.put("message", exp.getMessage());
+        return errorMap;
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(EmailAlreadyExistException.class)
+    public Map<String, String> handleEmailAlreadyExistException(EmailAlreadyExistException exp) {
+        Map<String, String> errorMap = new HashMap<>();
+        errorMap.put("success", "false");
+        errorMap.put("message", exp.getMessage());
+        return errorMap;
+    }
+
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(UserNotFoundException.class)
     public Map<String, String> handleUserNotFoundException(UserNotFoundException exp) {
