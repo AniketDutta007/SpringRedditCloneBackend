@@ -13,9 +13,7 @@ import com.example.springredditclone.repository.UserRepository;
 import com.example.springredditclone.repository.VerificationTokenRepository;
 import com.example.springredditclone.security.JWTProvider;
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -47,7 +45,7 @@ public class AuthService {
     private final ApplicationConfig appConfig;
 
     @Transactional
-    public User getCurrentUser() throws UserNotFoundException {
+    public User getCurrentUser() {
         Jwt principal = (Jwt) SecurityContextHolder.
                 getContext().getAuthentication().getPrincipal();
         return userRepository.findByUsername(principal.getSubject())
@@ -131,14 +129,17 @@ public class AuthService {
         );
         Authentication authentication = authenticationManager.authenticate(authenticationToken);
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        User user = userRepository.findByUsername(loginRequest.getUsername()).orElseThrow(UserNotFoundException::new);
         String token = jwtProvider.generateToken(authentication);
         return AuthenticationResponse.builder()
                 .accessToken(token)
-                .refreshToken(refreshTokenService.generateRefreshToken(user).getToken())
                 .expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
                 .username(loginRequest.getUsername())
                 .build();
+    }
+
+    public String generateRefreshToken(LoginRequest loginRequest) throws UserNotFoundException {
+        User user = userRepository.findByUsername(loginRequest.getUsername()).orElseThrow(UserNotFoundException::new);
+        return refreshTokenService.generateRefreshToken(user).getToken().toString();
     }
 
     public AuthenticationResponse accessToken(String rtoken) throws InvalidRefreshTokenException {
@@ -146,7 +147,6 @@ public class AuthService {
         User user = refreshToken.getUser();
         String token = jwtProvider.generateTokenWithUsername(user.getUsername());
         return AuthenticationResponse.builder()
-                .refreshToken(rtoken)
                 .accessToken(token)
                 .username(user.getUsername())
                 .expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))

@@ -6,15 +6,19 @@ import com.example.springredditclone.model.User;
 import com.example.springredditclone.repository.RefreshTokenRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.UUID;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
+    @Value("${refreshToken.expiration.time}")
+    private Integer refreshTokenExpirationInMillis;
 
     @Transactional
     public RefreshToken generateRefreshToken(User user) {
@@ -33,5 +37,9 @@ public class RefreshTokenService {
     @Transactional
     public void deleteRefreshToken(String token) {
         refreshTokenRepository.deleteByToken(token);
+    }
+
+    public Integer getRefreshTokenExpirationInMillis() {
+        return refreshTokenExpirationInMillis;
     }
 }

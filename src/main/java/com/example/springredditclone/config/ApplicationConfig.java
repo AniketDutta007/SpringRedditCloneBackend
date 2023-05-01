@@ -1,7 +1,6 @@
 package com.example.springredditclone.config;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +11,8 @@ import org.springframework.context.annotation.Configuration;
 public class ApplicationConfig {
     @NotNull
     private String url;
+    @NotNull
+    private String domain;
 
     public String getUrl() {
         return url;
@@ -19,5 +20,13 @@ public class ApplicationConfig {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
     }
 }
